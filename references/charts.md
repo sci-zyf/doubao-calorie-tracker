@@ -175,14 +175,14 @@
 - 基础代谢缺口 = 基础代谢 - 总热量（不含运动，为负表示已超基础代谢）
 - 真实热量缺口 = 基础代谢 + 活动能量 - 总热量（含运动消耗，减脂期主要看这个）
 - **活动能量为 0 时**：基础代谢缺口与真实热量缺口数值相等、两根柱子等高，属正常现象。此时在图下方加一句文字说明："今日未记录活动能量，真实热量缺口 = 基础代谢缺口。回复'跑步消耗XXX卡'可记录运动。"
-- **⚠️ 必须四根柱子**：xAxis.data 必须严格填写四个值 `["基础代谢","已摄入","基础代谢缺口","真实热量缺口"]`，series 也必须是四个独立 series（每根柱子一个 series），禁止把四个数据塞进一个 series 的 data 数组（容易导致 x 轴标签缺失或柱子错位）。
+- **⚠️ 必须四根柱子**：xAxis.data 固定为四个字符串 `["基础代谢","已摄入","基础代谢缺口","真实热量缺口"]`，禁止删减；series.data 必须是四个对象，一一对应四个标签，禁止只写两个。
 
 ```echarts
 {
   backgroundColor: "transparent",
   title: {
     text: "今日热量缺口",
-    subtext: "YYYY-MM-DD | 单位 kcal | 预期摄入 每日预期摄入 kcal（灰虚线）",
+    subtext: "2026-09-09 | 单位 kcal | 预期摄入 1600 kcal（灰虚线）",
     left: "center",
     textStyle: { color: "#1A1B1C", fontSize: 15, fontWeight: 600 },
     subtextStyle: { color: "#6B7280", fontSize: 11 }
@@ -195,18 +195,11 @@
     textStyle: { fontSize: 10, lineHeight: 14 },
     padding: [6, 8]
   },
-  legend: {
-    data: ["基础代谢", "已摄入", "基础代谢缺口", "真实热量缺口"],
-    bottom: 2,
-    itemWidth: 14,
-    itemHeight: 8,
-    textStyle: { color: "#6B7280", fontSize: 11 }
-  },
   grid: {
     left: 44,
     right: 16,
     top: 64,
-    bottom: 44,
+    bottom: 16,
     containLabel: true
   },
   xAxis: {
@@ -221,52 +214,29 @@
   },
   series: [
     {
-      name: "基础代谢",
+      name: "热量",
       type: "bar",
       barWidth: "50%",
-      itemStyle: { color: "#8BC8EA" },
-      label: { show: true, position: "top", color: "#555", fontSize: 11 },
-      data: [基础代谢, null, null, null]
-    },
-    {
-      name: "已摄入",
-      type: "bar",
-      barWidth: "50%",
-      itemStyle: { color: "#E8906A" },
-      label: { show: true, position: "top", color: "#555", fontSize: 11 },
-      data: [null, 总热量, null, null]
-    },
-    {
-      name: "基础代谢缺口",
-      type: "bar",
-      barWidth: "50%",
-      itemStyle: { color: "#A8D8A8" },
-      label: { show: true, position: "top", color: "#555", fontSize: 11 },
-      data: [null, null, 基础代谢缺口, null]
-    },
-    {
-      name: "真实热量缺口",
-      type: "bar",
-      barWidth: "50%",
-      itemStyle: { color: "#B39DDB" },
       label: { show: true, position: "top", color: "#555", fontSize: 11 },
       markLine: {
         silent: true,
         symbol: "none",
         lineStyle: { color: "#9CA3AF", type: "dashed", width: 1.5 },
         label: { show: false },
-        data: [{ yAxis: 每日预期摄入 }]
+        data: [{ yAxis: 1600 }]
       },
-      data: [null, null, null, 真实热量缺口]
-    }
-  ]
-}
-      },
-      data: [真实热量缺口]
+      data: [
+        { value: 1800, itemStyle: { color: "#8BC8EA" } },
+        { value: 262, itemStyle: { color: "#E8906A" } },
+        { value: 1538, itemStyle: { color: "#A8D8A8" } },
+        { value: 1538, itemStyle: { color: "#B39DDB" } }
+      ]
     }
   ]
 }
 ```
+
+> 生成时只需替换：subtext 中的日期和预期摄入数值、markLine.data[0].yAxis、series.data 中四个 value。xAxis.data 的四个标签和颜色固定不变，不要修改。
 
 ---
 
