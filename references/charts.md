@@ -169,16 +169,19 @@
 }
 ```
 
-### 图3：热量缺口（柱状图）
+### 图3：热量缺口（柱状图 + 虚线参考线）
 
-基础代谢 / 每日预期摄入 / 已摄入 / 热量缺口，单位 kcal；热量缺口 = 基础代谢 - 总热量（为负时表示已超标）；每日预期摄入仅作参考对比。
+基础代谢 / 已摄入 / 基础代谢缺口 / 真实热量缺口，单位 kcal；每日预期摄入以灰色虚线作参考线。
+- 基础代谢缺口 = 基础代谢 - 总热量（不含运动，为负表示已超基础代谢）
+- 真实热量缺口 = 基础代谢 + 活动能量 - 总热量（含运动消耗，减脂期主要看这个）
+- **活动能量为 0 时**：基础代谢缺口与真实热量缺口数值相等、两根柱子等高，属正常现象。此时在图下方加一句文字说明："今日未记录活动能量，真实热量缺口 = 基础代谢缺口。回复'跑步消耗XXX卡'可记录运动。"
 
 ```echarts
 {
   backgroundColor: "transparent",
   title: {
     text: "今日热量缺口",
-    subtext: "YYYY-MM-DD | 单位 kcal",
+    subtext: "YYYY-MM-DD | 单位 kcal | 灰线=每日预期摄入",
     left: "center",
     textStyle: { color: "#1A1B1C", fontSize: 15, fontWeight: 600 },
     subtextStyle: { color: "#6B7280", fontSize: 11 }
@@ -191,16 +194,23 @@
     textStyle: { fontSize: 10, lineHeight: 14 },
     padding: [6, 8]
   },
+  legend: {
+    data: ["基础代谢", "已摄入", "基础代谢缺口", "真实热量缺口"],
+    bottom: 2,
+    itemWidth: 14,
+    itemHeight: 8,
+    textStyle: { color: "#6B7280", fontSize: 11 }
+  },
   grid: {
     left: 44,
     right: 16,
-    top: 84,
-    bottom: 32,
+    top: 60,
+    bottom: 36,
     containLabel: true
   },
   xAxis: {
     type: "category",
-    data: ["基础代谢", "每日预期摄入", "已摄入", "热量缺口"],
+    data: ["基础代谢", "已摄入", "基础代谢缺口", "真实热量缺口"],
     axisLabel: { color: "#555", fontSize: 11 }
   },
   yAxis: {
@@ -219,11 +229,18 @@
         color: "#555",
         fontSize: 11
       },
+      markLine: {
+        silent: true,
+        symbol: "none",
+        lineStyle: { color: "#C8CDD3", type: "dashed", width: 1.5 },
+        label: { formatter: "预期摄入 {c} kcal", color: "#C8CDD3", fontSize: 10, position: "insideEndTop" },
+        data: [{ yAxis: 每日预期摄入 }]
+      },
       data: [
         { value: 基础代谢, itemStyle: { color: "#8BC8EA" } },
-        { value: 每日预期摄入, itemStyle: { color: "#C8CDD3" } },
         { value: 总热量, itemStyle: { color: "#E8906A" } },
-        { value: 热量缺口, itemStyle: { color: "#A8D8A8" } }
+        { value: 基础代谢缺口, itemStyle: { color: "#A8D8A8" } },
+        { value: 真实热量缺口, itemStyle: { color: "#B39DDB" } }
       ]
     }
   ]
@@ -242,7 +259,7 @@
 ### 数据来源
 
 一次查询拉取，均在「每日汇总」表按日期范围过滤（`+record-list --filter-json`，datetime 区间不支持 `>=`/`<=`，用 `>`/`<` + `ExactDate(边界前一天/后一天)`）：
-- 热量趋势：总热量、每日预期摄入、基础代谢、日期
+- 热量趋势：总热量、每日预期摄入、基础代谢、活动能量、基础代谢缺口、真实热量缺口、日期
 - 营养素趋势：每日碳水、每日蛋白质、每日脂肪（占比与总质量由表格公式已算好，直接读）
 - 身体档案：从「身体档案」表按日期范围拉取 体重、BMI、BMI分类、六围度
 
@@ -290,6 +307,7 @@
 
 ### 历史看板数据口径提示
 
-- 热量缺口 = 基础代谢 - 总热量（负=超标）；剩余可摄入 = 每日预期摄入 - 总热量。
+- 基础代谢缺口 = 基础代谢 - 总热量（负=已超基础代谢）；真实热量缺口 = 基础代谢 + 活动能量 - 总热量（含运动，减脂期主要看这个）；摄入余量 = 每日预期摄入 - 总热量（负=已超标）。
+- 活动能量由活动记录表按日期聚合，无记录时为 0，此时真实热量缺口 = 基础代谢缺口。
 - 营养素占比合计恒为 100%；当日三项之和为 0（无任何营养素记录）时占比留空。
 - 粒度/范围变化不改变数据本身，只改变展示窗口；标题 subtext 写清日期范围与"逐日"。
