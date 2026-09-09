@@ -23,16 +23,20 @@
    - README.md → calorie-tracker/README.md
    - references/charts.md → calorie-tracker/references/charts.md
    - references/table-template.md → calorie-tracker/references/table-template.md
-4. 从 GitHub 获取最新版本号：请求 https://api.github.com/repos/sci-zyf/doubao-calorie-tracker/releases/latest，取返回的 tag_name（去掉前缀 v，如 v1.0.0 → 1.0.0）；若无 release 则请求 https://api.github.com/repos/sci-zyf/doubao-calorie-tracker/tags 取第一个
+4. 从 GitHub 获取最新版本号：
+   - 先请求 https://api.github.com/repos/sci-zyf/doubao-calorie-tracker/releases/latest
+   - 若返回 404（无正式 Release），则请求 https://api.github.com/repos/sci-zyf/doubao-calorie-tracker/tags，取数组第一个的 name
+   - 取到的 tag_name 去掉前缀 v（如 v0.3.0 → 0.3.0），记为 latest_version
+   - 若两个接口都无数据，latest_version 设为 "unknown"，并在最终结果中提示用户"仓库暂无 tag"
 5. 检查 config.json 是否已存在：
-   - 不存在 → 创建 config.json，写入 {"initialized": false, "version": "获取到的版本号", "tables": {}, "profile": {}}
-   - 已存在 → 只更新 version 字段为最新版本号，**绝对不要覆盖 tables 和 profile**（含飞书访问令牌和个人数据）
+   - 不存在 → 创建 config.json，写入 {"initialized": false, "version": "latest_version", "tables": {}, "profile": {}}
+   - 已存在 → 只更新 version 字段为 latest_version，**绝对不要覆盖 tables 和 profile**（含飞书访问令牌和个人数据）
 6. 安装完成后告诉我当前版本号，并列出已创建的文件，并提示我启动新会话（工作模式）以使用技能。
 ```
 
 > 提示词会让 AI 自动判断当前是豆包云电脑还是本地电脑，选择对应的 user_skills 路径，无需手动区分。
 
-安装完成后**打开新的豆包会话（工作模式）**，新技能会被自动加载。首次使用时发送食物图片或说"记录早餐"，技能会自动引导创建专属飞书多维表格并填写个人参数（含基础代谢和每日目标，必填）。
+安装完成后**启动新会话（工作模式）**，新技能会被自动加载。首次使用时发送食物图片或说"记录早餐"，技能会自动引导创建专属飞书多维表格并填写个人参数（含基础代谢和每日目标，必填）。
 
 ### 方式二：手动安装（高级用户）
 
@@ -71,15 +75,19 @@ git clone https://github.com/sci-zyf/doubao-calorie-tracker.git \
 仓库地址：https://github.com/sci-zyf/doubao-calorie-tracker
 
 请执行以下操作：
-1. 先确认当前环境的用户技能目录路径，找到已安装的 calorie-tracker/ 目录
-2. 从仓库拉取最新版本的以下文件，覆盖到对应位置（不要覆盖 config.json）：
-   - SKILL.md
-   - README.md
-   - references/charts.md
-   - references/table-template.md
-3. 从 GitHub 获取最新版本号：请求 https://api.github.com/repos/sci-zyf/doubao-calorie-tracker/releases/latest，取返回的 tag_name（去掉前缀 v）；若无 release 则请求 https://api.github.com/repos/sci-zyf/doubao-calorie-tracker/tags 取第一个
-4. 更新 config.json 中的 version 字段为最新版本号（绝对不要删除或覆盖 config.json 中的其他字段，含飞书访问令牌和个人数据）
-5. 更新完成后列出已更新的文件和最新版本号，并提示我启动新会话（工作模式）以使用技能。
+1. 先确认当前环境的用户技能目录路径，找到已安装的 calorie-tracker/ 目录，读取其中的 config.json（只读取，不修改）
+2. 从 GitHub 获取最新版本号：
+   - 先请求 https://api.github.com/repos/sci-zyf/doubao-calorie-tracker/releases/latest
+   - 若返回 404（无正式 Release），则请求 https://api.github.com/repos/sci-zyf/doubao-calorie-tracker/tags，取数组第一个的 name
+   - 取到的 tag_name 去掉前缀 v（如 v0.3.0 → 0.3.0），记为 latest_version
+   - 若两个接口都无数据，latest_version 设为 "unknown"，并在最终结果中提示用户"仓库暂无 tag，版本号未更新"
+3. 从仓库拉取最新版本的以下文件，覆盖到对应位置：
+   - SKILL.md → calorie-tracker/SKILL.md
+   - README.md → calorie-tracker/README.md
+   - references/charts.md → calorie-tracker/references/charts.md
+   - references/table-template.md → calorie-tracker/references/table-template.md
+4. 更新 config.json：只将 version 字段改为 latest_version，**绝对不要修改或删除 tables、profile、initialized 等其他字段**（含飞书访问令牌和个人数据）
+5. 更新完成后列出：已覆盖的文件列表、更新前版本号、更新后版本号，并提示我启动新会话（工作模式）以使用技能。
 ```
 
 **方式二：git clone 安装的用户**
@@ -90,7 +98,7 @@ git clone https://github.com/sci-zyf/doubao-calorie-tracker.git \
 
 重新发送一次安装提示词，AI 会从 GitHub 拉取最新文件覆盖，并检测到 config.json 已存在，只更新 version 字段，不覆盖 tables 和 profile（你的表格配置和个人数据保留）。
 
-更新后需**重启豆包会话**使新版本生效。
+更新后需**启动新会话（工作模式）**使新版本生效。
 
 ### 如何卸载
 

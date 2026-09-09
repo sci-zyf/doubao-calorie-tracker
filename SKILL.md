@@ -44,7 +44,7 @@ config.json 结构：
 1. 向用户说明：将创建一个专属多维表格（含 饮食记录/每日汇总/身体档案/活动记录 四张表），数据只写入用户自己的表格，征得同意后继续。
 2. **自动建表（默认）**：读取 `references/table-template.md`，按其中的顺序和字段 JSON 依次执行 `+base-create`（饮食记录）→ `+table-create`（每日汇总）→ `+table-create`（身体档案）→ `+table-create`（活动记录）。建表时通过 `--fields` 一次性传入所有字段（含 formula），**无需** `--i-have-read-guide`；该参数仅在后续单独用 `+field-create` 创建 formula/lookup 字段时才需要。
    - **建表失败回滚**：如果三步中任意一步失败，立即停止，向用户报告已成功创建的内容（如"Base 已创建但每日汇总表创建失败"），并询问是否清理已创建的残缺 Base 后重试。用户同意清理时，用 `+base-delete --base-token <token> --yes` 删除残缺 Base 后从头重试；用户选择保留时，走下方「手动兜底」流程。**禁止在失败后静默重新创建新 Base，导致残缺 Base 残留。**
-3. 从命令返回值提取 base_token 和三个 table_id，写入 config.json 的 `tables`。
+3. 从命令返回值提取 base_token 和四个 table_id，写入 config.json 的 `tables`（保留已有的 `version` 字段）。
 4. 询问用户个人参数（**全部必填**）：
    - 身高（cm）
    - 出生日期（YYYY-MM-DD）
@@ -52,7 +52,7 @@ config.json 结构：
    - 基础代谢（kcal）：男生参考 1600-1800，女生参考 1200-1500，可根据自身情况填写
    - 每日预期摄入（kcal）：减脂期建议基础代谢-300~500，维持期约等于基础代谢
    写入 `profile`（含 `default_bmr`、`default_target` 两个字段）。
-5. 置 `initialized: true`，提示"初始化完成，可以开始记录"。若建表过程中产生了测试数据，删除前先向用户确认。
+5. 置 `initialized: true`（更新 config.json 时保留已有的 `version` 字段），提示"初始化完成，可以开始记录"。若建表过程中产生了测试数据，删除前先向用户确认。
 6. **手动兜底**：自动建表失败或用户已有表格时，请用户提供表格链接（`+url-resolve`）或已有 Base token/table_id，解析后写入 config.json；表结构不完整时按 `references/table-template.md` 补齐缺失表或字段。
 
 ## 配置管理
