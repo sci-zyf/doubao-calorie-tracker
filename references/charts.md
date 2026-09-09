@@ -171,17 +171,18 @@
 
 ### 图3：热量缺口（柱状图 + 虚线参考线）
 
-基础代谢 / 已摄入 / 基础代谢缺口 / 真实热量缺口，单位 kcal；每日预期摄入以灰色虚线作参考线。
+基础代谢 / 已摄入 / 基础代谢缺口 / 真实热量缺口，单位 kcal；每日预期摄入以灰色虚线作视觉参考线，**具体数值写在 subtext 中，虚线上不显示标签**（避免与柱子顶部数字重叠，无论柱子多高都不打架）。
 - 基础代谢缺口 = 基础代谢 - 总热量（不含运动，为负表示已超基础代谢）
 - 真实热量缺口 = 基础代谢 + 活动能量 - 总热量（含运动消耗，减脂期主要看这个）
 - **活动能量为 0 时**：基础代谢缺口与真实热量缺口数值相等、两根柱子等高，属正常现象。此时在图下方加一句文字说明："今日未记录活动能量，真实热量缺口 = 基础代谢缺口。回复'跑步消耗XXX卡'可记录运动。"
+- **⚠️ 必须四根柱子**：xAxis.data 必须严格填写四个值 `["基础代谢","已摄入","基础代谢缺口","真实热量缺口"]`，series 也必须是四个独立 series（每根柱子一个 series），禁止把四个数据塞进一个 series 的 data 数组（容易导致 x 轴标签缺失或柱子错位）。
 
 ```echarts
 {
   backgroundColor: "transparent",
   title: {
     text: "今日热量缺口",
-    subtext: "YYYY-MM-DD | 单位 kcal | 灰线=每日预期摄入",
+    subtext: "YYYY-MM-DD | 单位 kcal | 预期摄入 每日预期摄入 kcal（灰虚线）",
     left: "center",
     textStyle: { color: "#1A1B1C", fontSize: 15, fontWeight: 600 },
     subtextStyle: { color: "#6B7280", fontSize: 11 }
@@ -204,7 +205,7 @@
   grid: {
     left: 44,
     right: 16,
-    top: 60,
+    top: 64,
     bottom: 36,
     containLabel: true
   },
@@ -220,28 +221,43 @@
   },
   series: [
     {
-      name: "热量",
+      name: "基础代谢",
       type: "bar",
       barWidth: "40%",
-      label: {
-        show: true,
-        position: "top",
-        color: "#555",
-        fontSize: 11
-      },
+      itemStyle: { color: "#8BC8EA" },
+      label: { show: true, position: "top", color: "#555", fontSize: 11 },
+      data: [基础代谢]
+    },
+    {
+      name: "已摄入",
+      type: "bar",
+      barWidth: "40%",
+      itemStyle: { color: "#E8906A" },
+      label: { show: true, position: "top", color: "#555", fontSize: 11 },
+      data: [总热量]
+    },
+    {
+      name: "基础代谢缺口",
+      type: "bar",
+      barWidth: "40%",
+      itemStyle: { color: "#A8D8A8" },
+      label: { show: true, position: "top", color: "#555", fontSize: 11 },
+      data: [基础代谢缺口]
+    },
+    {
+      name: "真实热量缺口",
+      type: "bar",
+      barWidth: "40%",
+      itemStyle: { color: "#B39DDB" },
+      label: { show: true, position: "top", color: "#555", fontSize: 11 },
       markLine: {
         silent: true,
         symbol: "none",
-        lineStyle: { color: "#C8CDD3", type: "dashed", width: 1.5 },
-        label: { formatter: "预期摄入 {c} kcal", color: "#C8CDD3", fontSize: 10, position: "insideEndTop" },
+        lineStyle: { color: "#9CA3AF", type: "dashed", width: 1.5 },
+        label: { show: false },
         data: [{ yAxis: 每日预期摄入 }]
       },
-      data: [
-        { value: 基础代谢, itemStyle: { color: "#8BC8EA" } },
-        { value: 总热量, itemStyle: { color: "#E8906A" } },
-        { value: 基础代谢缺口, itemStyle: { color: "#A8D8A8" } },
-        { value: 真实热量缺口, itemStyle: { color: "#B39DDB" } }
-      ]
+      data: [真实热量缺口]
     }
   ]
 }
