@@ -206,7 +206,7 @@
     left: 44,
     right: 16,
     top: 64,
-    bottom: 36,
+    bottom: 44,
     containLabel: true
   },
   xAxis: {
@@ -223,31 +223,31 @@
     {
       name: "基础代谢",
       type: "bar",
-      barWidth: "40%",
+      barWidth: "50%",
       itemStyle: { color: "#8BC8EA" },
       label: { show: true, position: "top", color: "#555", fontSize: 11 },
-      data: [基础代谢]
+      data: [基础代谢, null, null, null]
     },
     {
       name: "已摄入",
       type: "bar",
-      barWidth: "40%",
+      barWidth: "50%",
       itemStyle: { color: "#E8906A" },
       label: { show: true, position: "top", color: "#555", fontSize: 11 },
-      data: [总热量]
+      data: [null, 总热量, null, null]
     },
     {
       name: "基础代谢缺口",
       type: "bar",
-      barWidth: "40%",
+      barWidth: "50%",
       itemStyle: { color: "#A8D8A8" },
       label: { show: true, position: "top", color: "#555", fontSize: 11 },
-      data: [基础代谢缺口]
+      data: [null, null, 基础代谢缺口, null]
     },
     {
       name: "真实热量缺口",
       type: "bar",
-      barWidth: "40%",
+      barWidth: "50%",
       itemStyle: { color: "#B39DDB" },
       label: { show: true, position: "top", color: "#555", fontSize: 11 },
       markLine: {
@@ -256,6 +256,11 @@
         lineStyle: { color: "#9CA3AF", type: "dashed", width: 1.5 },
         label: { show: false },
         data: [{ yAxis: 每日预期摄入 }]
+      },
+      data: [null, null, null, 真实热量缺口]
+    }
+  ]
+}
       },
       data: [真实热量缺口]
     }
