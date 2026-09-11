@@ -6,11 +6,12 @@
 
 | 颜色 | 用途 |
 |---|---|
-| `#8BC8EA` 蓝 | 早餐 / 碳水 / 基础代谢 |
-| `#E8906A` 橙 | 午餐 / 脂肪 / 已摄入 |
-| `#A8D8A8` 绿 | 晚餐 / 蛋白质 / 热量缺口 |
-| `#B39DDB` 紫 | 加餐 |
-| `#C8CDD3` 灰 | 每日预期摄入 |
+| `#8BC8EA` 蓝 | 早餐 / 碳水 / 基础代谢（含图3「基础代谢」柱） |
+| `#E8906A` 橙 | 午餐 / 脂肪 / 已摄入（含图3「已摄入」柱） |
+| `#A8D8A8` 绿 | 晚餐 / 蛋白质 / 热量缺口（含图3「基础代谢缺口」柱） |
+| `#B39DDB` 紫 | 加餐 / 图3「真实热量缺口」柱 |
+| `#C8CDD3` 灰 | 每日预期摄入（历史看板趋势折线） |
+| `#9CA3AF` 深灰 | 图3 预期摄入虚线（比折线灰更深，避免与柱体、标签混在一起看不出） |
 | `#D8DEE4` 浅灰 | 剩余（仅总进度图用） |
 | `#5B8FF9` 蓝 | 身体档案：体重 |
 | `#F6BD16` 黄 | 身体档案：BMI |
@@ -45,6 +46,7 @@
 | 场景 | legend 位置 | dataZoom | grid.top | grid.bottom |
 |---|---|---|---|---|
 | 内嵌单图、无 slider | `bottom:2` | 仅 `inside` | 56~60 | 36 |
+| 柱状图、无 legend（图3） | 无 | 仅 `inside` | 64 | 16 |
 | HTML 看板、有 slider | `top:24` | `inside` + `slider(bottom:4,height:14)` | 52 | 30 |
 | 双 y 轴图 | 同上 | 同上 | 同上 | 同上 |
 
@@ -52,6 +54,7 @@
 - `grid.bottom` 必须 ≥ 底部元素高度（legend 约 20px 或 slider 约 18px）+ xAxis 标签高度（约 16px）。
 - 禁止 legend 和 dataZoom slider 同时放在底部或同时放在顶部。
 - 饼图/圆环图无 grid，legend 默认 `bottom:0`，不受此表约束。
+- 图3 柱状图为单 series，柱名由 xAxis 标签承担，**不配 legend**；无底部元素时 `grid.bottom` 取 16 即够。
 
 ### 双 y 轴分隔线
 
@@ -175,7 +178,9 @@
 - 基础代谢缺口 = 基础代谢 - 总热量（不含运动，为负表示已超基础代谢）
 - 真实热量缺口 = 基础代谢 + 活动能量 - 总热量（含运动消耗，减脂期主要看这个）
 - **活动能量为 0 时**：基础代谢缺口与真实热量缺口数值相等、两根柱子等高，属正常现象。此时在图下方加一句文字说明："今日未记录活动能量，真实热量缺口 = 基础代谢缺口。可回复运动消耗，如'跑步300卡''健身500卡'，或直接说'今天活动了500卡'。"
-- **⚠️ 必须四根柱子**：xAxis.data 固定为四个字符串 `["基础代谢","已摄入","基础代谢缺口","真实热量缺口"]`，禁止删减；series.data 必须是四个对象，一一对应四个标签，禁止只写两个。
+- **⚠️ 必须四根柱子（单 series 方案）**：xAxis.data 固定为四个字符串 `["基础代谢","已摄入","基础代谢缺口","真实热量缺口"]`，禁止删减；series 固定为**单 series**（name:"热量"），data 必须是四个对象，一一对应四个标签，每个对象带 `itemStyle.color`，禁止拆成多个 series，也禁止只写两个。
+  - 拆成多 series 的写法（每根柱子一个 series，其余位置用 `null` 占位）在 v0.3.1 / v0.3.2 用过，会产生柱子错位，v0.3.3 已改回单 series，不要回退。
+- **⚠️ 禁止给图3 加 legend**：单 series 柱状图的 series 名是"热量"，`legend.data` 写四个柱名匹配不到任何 series（bar 系列也不提供图例数据项），图例整块不会绘制，只在控制台留下 `series not exists` 警告。柱名已由 xAxis 标签标注，不需要图例重复一遍。
 
 ```echarts
 {
@@ -205,7 +210,7 @@
   xAxis: {
     type: "category",
     data: ["基础代谢", "已摄入", "基础代谢缺口", "真实热量缺口"],
-    axisLabel: { color: "#555", fontSize: 11 }
+    axisLabel: { color: "#555", fontSize: 11, interval: 0 }
   },
   yAxis: {
     type: "value",
@@ -216,7 +221,7 @@
     {
       name: "热量",
       type: "bar",
-      barWidth: "50%",
+      barWidth: "40%",
       label: { show: true, position: "top", color: "#555", fontSize: 11 },
       markLine: {
         silent: true,
@@ -236,7 +241,9 @@
 }
 ```
 
-> 生成时只需替换：subtext 中的日期和预期摄入数值、markLine.data[0].yAxis、series.data 中四个 value。xAxis.data 的四个标签和颜色固定不变，不要修改。
+> 生成时只需替换四处：subtext 中的日期与预期摄入数值、`markLine.data[0].yAxis`、`series.data` 中四个 value。其余字段固定不变，不要修改，包括：xAxis.data 的四个标签、柱子颜色、`barWidth:"40%"`、`axisLabel.interval:0`、`grid.bottom:16`、无顶层 `color` 数组、无 `legend`、数据项不带 `name` 字段。
+
+> **⚠️ 输出后强制自检（与上方模板逐字段比对，5 项全过才能交付）**：① 除上述四处可替换值外，其余字段与模板完全一致；② 无顶层 `color` 数组、无 `legend` 块；③ series 为单 series（`name:"热量"`），`barWidth:"40%"`，data 含四个对象，每个对象只有 `value` 和 `itemStyle.color`，不带 `name` 字段；④ `xAxis.data` 为四个标签，且 `axisLabel.interval` 为 0；⑤ `grid` 为 `{left:44, right:16, top:64, bottom:16, containLabel:true}`。任一处不符，按模板覆盖后重新输出。
 
 ---
 
